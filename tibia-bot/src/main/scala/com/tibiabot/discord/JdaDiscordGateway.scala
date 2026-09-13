@@ -73,7 +73,12 @@ final class JdaDiscordGateway(jda: JDA) extends DiscordGateway with com.typesafe
   def selfUserId: String = jda.getSelfUser.getId
   def selfUserName: String = jda.getSelfUser.getName
   def selfUserAvatarUrl: String = jda.getSelfUser.getEffectiveAvatarUrl
-  def applicationOwnerId: String = "313911524475535364"
+  
+private lazy val resolvedApplicationOwnerId: String =
+  try jda.retrieveApplicationInfo().complete().getOwner.getId
+  catch { case _: Throwable => "" }
+
+def applicationOwnerId: String = resolvedApplicationOwnerId
   def setWatchingActivity(text: String): Unit =
     jda.getPresence().setActivity(Activity.of(Activity.ActivityType.WATCHING, text))
 }
