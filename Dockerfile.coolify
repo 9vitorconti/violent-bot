@@ -16,6 +16,5 @@ COPY --from=builder /build/tibia-bot/target/docker/stage/opt/docker /opt/docker
 WORKDIR /opt/docker
 
 EXPOSE 8080
-EXPOSE 443
 
 ENTRYPOINT ["/opt/docker/bin/violent-bot-dedicated"]
