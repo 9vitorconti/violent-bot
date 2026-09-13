@@ -6,18 +6,21 @@ COPY . .
 
 WORKDIR /build/tibia-bot
 
-RUN sbt -batch docker:stage
+RUN sbt -batch stage
 
 
 FROM eclipse-temurin:25-jre
 
+RUN mkdir -p /opt/docker
+
 COPY --from=builder --chown=1001:0 \
-    /build/tibia-bot/target/docker/stage/opt/docker \
-    /opt/docker
+    /build/tibia-bot/target/universal/stage/ \
+    /opt/docker/
 
 RUN mkdir -p /opt/docker/cache/sprites \
-    && chown -R 1001:0 /opt/docker/cache \
-    && chmod -R 775 /opt/docker/cache
+    && chown -R 1001:0 /opt/docker \
+    && chmod -R 775 /opt/docker/cache \
+    && chmod +x /opt/docker/bin/violent-bot-dedicated
 
 WORKDIR /opt/docker
 
