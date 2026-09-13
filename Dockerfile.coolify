@@ -1,4 +1,4 @@
-FROM sbtscala/scala-sbt:eclipse-temurin-8u352-b08_1.8.2_2.13.10 AS builder
+FROM sbtscala/scala-sbt:eclipse-temurin-25.0.4_7_1.13.0_2.13.18 AS builder
 
 WORKDIR /build
 
@@ -9,12 +9,20 @@ WORKDIR /build/tibia-bot
 RUN sbt -batch docker:stage
 
 
-FROM eclipse-temurin:8-jre
+FROM eclipse-temurin:25-jre
 
-COPY --from=builder /build/tibia-bot/target/docker/stage/opt/docker /opt/docker
+COPY --from=builder --chown=1001:0 \
+    /build/tibia-bot/target/docker/stage/opt/docker \
+    /opt/docker
+
+RUN mkdir -p /opt/docker/cache/sprites \
+    && chown -R 1001:0 /opt/docker/cache \
+    && chmod -R 775 /opt/docker/cache
 
 WORKDIR /opt/docker
 
 EXPOSE 8080
+
+USER 1001:0
 
 ENTRYPOINT ["/opt/docker/bin/violent-bot-dedicated"]
