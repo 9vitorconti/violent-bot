@@ -1,0 +1,89 @@
+services:
+
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.coolify
+
+    restart: unless-stopped
+
+    environment:
+      TOKEN: ${TOKEN:?Discord bot token is required}
+
+      POSTGRES_HOST: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?PostgreSQL password is required}
+
+      TIBIADATA_HOST: ${TIBIADATA_HOST:-https://api.tibiadata.com}
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Redis password is required}
+
+      BOT_ROLE: ""
+
+      PATREON_SEATS_PER_USER: ${PATREON_SEATS_PER_USER:-5}
+
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      STATUS_DOMAIN: ${STATUS_DOMAIN:-}
+      WEB_BASE_URL: ${WEB_BASE_URL:-}
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    expose:
+      - "8080"
+
+  postgres:
+    image: postgres:16
+
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?PostgreSQL password is required}
+
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+
+    restart: unless-stopped
+
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - ${REDIS_PASSWORD:?Redis password is required}
+
+    volumes:
+      - redis-data:/data
+
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - -a
+        - ${REDIS_PASSWORD}
+        - --no-auth-warning
+        - ping
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
+  redis-data:
