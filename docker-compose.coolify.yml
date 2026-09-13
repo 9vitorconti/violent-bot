@@ -25,7 +25,6 @@ services:
       DISCORD_CLIENT_SECRET: '${DISCORD_CLIENT_SECRET:-}'
       SESSION_SECRET: '${SESSION_SECRET:-}'
       STATUS_DOMAIN: '${STATUS_DOMAIN:-}'
-      WEB_BASE_URL: '${WEB_BASE_URL:-}'
 
     depends_on:
       postgres:
