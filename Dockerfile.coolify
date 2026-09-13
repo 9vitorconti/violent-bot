@@ -1,0 +1,21 @@
+FROM sbtscala/scala-sbt:eclipse-temurin-8u352-b08_1.8.2_2.13.10 AS builder
+
+WORKDIR /build
+
+COPY . .
+
+WORKDIR /build/tibia-bot
+
+RUN sbt -batch docker:stage
+
+
+FROM eclipse-temurin:8-jre
+
+COPY --from=builder /build/tibia-bot/target/docker/stage/opt/docker /opt/docker
+
+WORKDIR /opt/docker
+
+EXPOSE 8080
+EXPOSE 443
+
+ENTRYPOINT ["/opt/docker/bin/violent-bot-dedicated"]
